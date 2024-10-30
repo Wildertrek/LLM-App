@@ -330,5 +330,3 @@ Here’s the streamlined list of technologies for your **LLM-App** AI applicatio
   - Logging: **ELK Stack** (Elasticsearch, Logstash, Kibana)
 
 ---
-
-This concise list provides a clear view of the technology stack, focusing on each component’s purpose in the application. Let me know if you’re ready for the next steps!

@@ -5,15 +5,45 @@ This project is an AI application hosted on OpenShift, designed to offer flexibl
 
 ## Project Structure
 ```plaintext
-├── helm/
-│   ├── charts/           # Helm charts for deploying components
-├── src/
-│   ├── api/              # API code for LLM and agent interactions
-│   ├── frontend/         # Web interface for user interaction
-├── db/
-│   ├── vector/           # Scripts for Weaviate setup and maintenance
-│   └── other_db/         # Scripts for MongoDB and PostgreSQL setup
-└── docs/                 # Documentation and setup guides
+LLM-App/
+├── README.md                # Project overview and setup instructions
+├── helm/                    # Helm chart for deploying components on OpenShift
+│   └── ai-application/      # Helm chart folder for AI application
+│       ├── Chart.yaml       # Helm chart metadata
+│       ├── values.yaml      # Default configuration values for all components
+│       └── templates/       # Kubernetes resource templates
+│           ├── configmap.yaml              # ConfigMap for environment variables
+│           ├── secret.yaml                 # Secrets for sensitive information
+│           ├── deployment-backend.yaml     # Deployment for Backend (FastAPI)
+│           ├── deployment-frontend.yaml    # Deployment for Frontend (Next.js)
+│           ├── deployment-llm-agents.yaml  # Deployment for LLM Agents
+│           ├── deployment-weaviate.yaml    # Deployment for Vector Database (Weaviate)
+│           ├── deployment-mongodb.yaml     # Deployment for Document Database (MongoDB)
+│           ├── deployment-postgresql.yaml  # Deployment for Relational Database (PostgreSQL)
+│           ├── deployment-mlflow.yaml      # Deployment for Experiment Tracking (MLflow)
+│           ├── deployment-prometheus.yaml  # Deployment for Metrics (Prometheus)
+│           ├── deployment-grafana.yaml     # Deployment for Monitoring (Grafana)
+│           ├── deployment-elasticsearch.yaml # Deployment for Log Management (Elasticsearch)
+│           ├── deployment-logstash.yaml    # Deployment for Log Ingestion (Logstash)
+│           ├── deployment-kibana.yaml      # Deployment for Log Visualization (Kibana)
+│           ├── service-backend.yaml        # Service for Backend API
+│           ├── service-frontend.yaml       # Service for Frontend
+│           ├── service-llm-agents.yaml     # Service for LLM Agents
+│           ├── service-weaviate.yaml       # Service for Vector Database
+│           ├── service-mongodb.yaml        # Service for Document Database
+│           ├── service-postgresql.yaml     # Service for Relational Database
+│           ├── service-mlflow.yaml         # Service for Experiment Tracking
+│           ├── service-prometheus.yaml     # Service for Prometheus
+│           ├── service-grafana.yaml        # Service for Grafana
+│           ├── service-elasticsearch.yaml  # Service for Elasticsearch
+│           ├── service-logstash.yaml       # Service for Logstash
+│           └── service-kibana.yaml         # Service for Kibana
+├── setup.sh                # Script to initialize Helm files and project structure
+└── src/                    # Source code for backend and frontend services
+    ├── frontend/           # Next.js frontend code for user interaction
+    ├── backend/            # FastAPI backend code for handling API requests
+    └── agents/             # Code for LLM Agents using LangChain and LangGraph
+
 ```
 
 ## Tech Stack and Component Choices

@@ -5,6 +5,9 @@ echo "🚀 Starting pull and setup for LLM-App..."
 # Pull standard images from repositories
 echo "⬇️ Pulling standard images..."
 
+# Experiment Tracking - MLflow
+podman pull ghcr.io/mlflow/mlflow:latest
+
 # Vector Database - Weaviate
 podman pull semitechnologies/weaviate
 
@@ -50,6 +53,14 @@ if grep -q "weaviateApiKey" helm/ai-application/templates/secret.yaml; then
 else
   echo "⚠️  Weaviate API key missing in secret.yaml. Please add it in base64-encoded format."
 fi
+
+# MLflow Tracking Password (if applicable)
+if grep -q "mlflowTrackingPassword" helm/ai-application/templates/secret.yaml; then
+  echo "🔑 MLflow tracking password is set in secret.yaml."
+else
+  echo "⚠️  MLflow tracking password missing in secret.yaml. Please add it in base64-encoded format."
+fi
+
 
 # Additional secret checks can be added here as needed
 

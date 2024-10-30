@@ -125,3 +125,180 @@ This project is an AI application hosted on OpenShift, designed to offer flexibl
 
 ---
 
+### **AI Application (LLM-App) Architecture Overview**
+
+1. **Frontend (User Interface)**
+   - **Technology**: **Next.js**
+   - **Purpose**: Provides the user interface for interacting with the application. Users can submit queries, view LLM responses, and interact with other data-driven features.
+   - **Deployment**: Deployed as a separate service managed by Helm.
+   - **Connection**: 
+     - Communicates with the **Backend API** to send user inputs and retrieve responses.
+     - Configured to handle secure communication through HTTPS.
+
+2. **Backend API**
+   - **Technology**: **FastAPI**
+   - **Purpose**: Serves as the core API layer, managing user requests, processing workflows, and integrating with the AI and database components. This is where most business logic, such as data parsing and LLM invocation, resides.
+   - **Deployment**: Deployed as a separate service, containerized and managed via Helm.
+   - **Connection**: 
+     - Connects to the **Frontend** for sending and receiving user data.
+     - Manages interactions with the **LLM Agents** and **Databases** for retrieval-augmented generation (RAG) and other workflows.
+     - Secured through API keys or token-based authentication.
+
+3. **Large Language Model (LLM) Agents**
+   - **Technology**: **LangChain** and **LangGraph**
+   - **Purpose**: Manages multi-step workflows, breaking down complex user requests, and integrating various LLMs based on the use case.
+   - **Deployment**: Packaged with the backend or as a microservice (depending on resource requirements).
+   - **Components**:
+     - **Primary LLMs**: Integrates **OpenAI API** for general-purpose LLM use and **Hugging Face Transformers** for specialized or local models.
+     - **Agent Tasks**: Includes document parsing, chunking, embedding creation, and response generation.
+   - **Connection**: 
+     - Invoked by the **Backend API** to process user inputs, retrieve data from the **Vector Database**, and generate responses.
+     - Utilizes **LangGraph** to manage conversation memory and entity relationships.
+
+4. **Vector Database (for Embeddings)**
+   - **Technology**: **Weaviate**
+   - **Purpose**: Stores vector embeddings for fast similarity-based retrieval. Essential for the RAG pipeline, as it allows for quick access to relevant information chunks in response to user queries.
+   - **Deployment**: Deployed as a standalone service with its own Helm configuration.
+   - **Connection**:
+     - Connects to the **Backend API** for embedding storage and retrieval.
+     - Works with **LLM Agents** to store or retrieve embeddings based on document parsing results.
+
+5. **Document Database (for Semi-Structured Data)**
+   - **Technology**: **MongoDB**
+   - **Purpose**: Manages semi-structured data, such as processed documents and user interactions that don’t fit in a relational database.
+   - **Deployment**: Deployed as a separate service, configured with a Helm chart.
+   - **Connection**:
+     - Connects to the **Backend API** for read and write operations.
+     - Stores raw or parsed documents used in RAG pipelines.
+
+6. **Relational Database (for Structured Data)**
+   - **Technology**: **PostgreSQL**
+   - **Purpose**: Manages structured data, such as metadata, user profiles, and system configurations, supporting relational queries and transactional data.
+   - **Deployment**: Deployed as a standalone service using Helm.
+   - **Connection**:
+     - Interacts with the **Backend API** for relational data retrieval and updates.
+     - Stores metadata for documents, user actions, and LLM configurations.
+
+7. **Experiment Tracking and Model Management**
+   - **Technology**: **MLflow**
+   - **Purpose**: Tracks model experiments, metadata, and performance metrics for the LLMs and other models used in the application.
+   - **Deployment**: Optional deployment, managed as a standalone Helm service or integrated into the Backend if lightweight.
+   - **Connection**:
+     - Connects with **Backend API** to log experiments, track versions, and manage model lifecycles.
+     - Can integrate with **LangChain** for advanced model versioning and testing.
+
+8. **Authentication & Security**
+   - **Technology**: **Auth0**
+   - **Purpose**: Manages user authentication and secure access to the API and application.
+   - **Deployment**: Integrated with the Backend API for secure user authentication.
+   - **Connection**:
+     - Secures access between the **Frontend** and **Backend API**.
+     - Manages user roles and permissions for different application features.
+
+9. **Observability and Monitoring**
+   - **Technology**: **Prometheus + Grafana** (for metrics) and **ELK Stack** (for logs)
+   - **Purpose**: Provides logging, monitoring, and visualization for application health, resource usage, and performance.
+   - **Deployment**: Separate Helm deployments for observability components.
+   - **Connection**:
+     - Collects logs and metrics from **Backend API**, **LLM Agents**, and **Databases**.
+     - Sends alerts based on defined thresholds for resource or error monitoring.
+
+---
+
+### **Flow of Data and Connections**
+
+1. **User Interaction**:
+   - Users interact with the **Frontend (Next.js)**, sending queries or commands that the frontend passes to the **Backend API**.
+
+2. **Backend Processing**:
+   - The **Backend API** handles the request and invokes the **LLM Agents** for any required parsing, embeddings, or LLM responses.
+   - The **LLM Agents** use **LangChain** and **LangGraph** to manage multi-step workflows, retrieve embeddings from **Weaviate**, and, if needed, request data from **MongoDB** or **PostgreSQL**.
+
+3. **RAG Pipeline Execution**:
+   - For RAG tasks, **LLM Agents** retrieve relevant embeddings from the **Vector Database (Weaviate)** and use these to provide context to the LLMs, improving response relevance.
+   - Processed responses are sent back through the **Backend API** to the **Frontend**.
+
+4. **Data Storage and Experiment Tracking**:
+   - **MongoDB** and **PostgreSQL** store semi-structured and structured data, respectively, keeping records of user interactions, processed documents, and metadata.
+   - **MLflow** tracks model experiments and performance, managed either by the **Backend API** or via direct logging from **LLM Agents**.
+
+5. **Security and Observability**:
+   - **Auth0** secures user sessions, verifying access before any frontend-to-backend interaction.
+   - **Prometheus + Grafana** and **ELK Stack** collect and monitor metrics and logs, ensuring system health and providing insights into application performance.
+
+This architecture establishes a clear pathway for modular, scalable interactions, allowing you to add new components or extend functionality as needed. Each component has a well-defined role, and the Helm-based deployments facilitate straightforward management and scaling in OpenShift.
+
+---
+
+## Technology Stack
+
+### **Frontend**
+- **Framework**: **Next.js** – for the user interface, providing server-side rendering and interactivity.
+
+### **Backend API**
+- **Framework**: **FastAPI** – handles user requests, processes workflows, and orchestrates interactions with other components.
+
+### **Large Language Model (LLM) Agents**
+- **Frameworks**:
+  - **LangChain** – for managing agent-based workflows and multi-step tasks.
+  - **LangGraph** – for handling conversation memory, entity relationships, and complex query management.
+- **LLM Integrations**:
+  - **OpenAI API** – for general-purpose LLM interactions.
+  - **Hugging Face Transformers** – for specialized or local LLM models.
+
+### **Databases**
+1. **Vector Database**:
+   - **Weaviate** – stores vector embeddings for similarity-based retrieval in the RAG pipeline.
+
+2. **Document Database**:
+   - **MongoDB** – manages semi-structured data like processed documents and user interactions.
+
+3. **Relational Database**:
+   - **PostgreSQL** – stores structured data, including metadata, user profiles, and configurations.
+
+### **Experiment Tracking and Model Management**
+- **Tool**: **MLflow** – tracks model experiments, versioning, and performance metrics.
+
+### **Authentication & Security**
+- **Tool**: **Auth0** – manages secure user authentication and API access.
+
+### **Observability and Monitoring**
+1. **Metrics**:
+   - **Prometheus** – collects system metrics for performance monitoring.
+   - **Grafana** – visualizes metrics and creates monitoring dashboards.
+
+2. **Logging**:
+   - **ELK Stack** (Elasticsearch, Logstash, Kibana) – aggregates and searches logs for debugging and error tracking.
+
+---
+
+Each of these components will be containerized and deployed in OpenShift using **Helm** for scalable, modular management. This technology stack provides a comprehensive setup for developing, managing, and scaling the application. 
+
+
+Here’s the streamlined list of technologies for your **LLM-App** AI application:
+
+---
+
+- **Frontend** - Framework: **Next.js**
+- **Backend API** - Framework: **FastAPI**
+
+- **LLM Agents**:
+  - Workflow Management: **LangChain**
+  - Context and Memory Handling: **LangGraph**
+  - LLM Integrations: **OpenAI API**, **Hugging Face Transformers**
+
+- **Vector Database** - Database: **Weaviate**
+- **Document Database** - Database: **MongoDB**
+- **Relational Database** - Database: **PostgreSQL**
+
+- **Experiment Tracking and Model Management** - Tool: **MLflow**
+
+- **Authentication & Security** - Tool: **Auth0**
+
+- **Observability and Monitoring**:
+  - Metrics: **Prometheus** and **Grafana**
+  - Logging: **ELK Stack** (Elasticsearch, Logstash, Kibana)
+
+---
+
+This concise list provides a clear view of the technology stack, focusing on each component’s purpose in the application. Let me know if you’re ready for the next steps!

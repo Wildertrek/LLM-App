@@ -1,0 +1,103 @@
+# Global configurations
+global:
+  imagePullPolicy: IfNotPresent
+
+# Frontend (Next.js)
+frontend:
+  image: "your-frontend-image"
+  tag: "latest"
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 3000
+
+# Backend API (FastAPI)
+backend:
+  image: "your-backend-image"
+  tag: "latest"
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 8000
+  auth:
+    clientId: "{{ .Values.backend.auth.clientId | default (lookup 'v1' 'Secret' .Release.Namespace 'llm-app-secrets').data.clientId | b64dec }}"
+    clientSecret: "{{ .Values.backend.auth.clientSecret | default (lookup 'v1' 'Secret' .Release.Namespace 'llm-app-secrets').data.clientSecret | b64dec }}"
+
+# LLM Agents
+llmAgents:
+  image: "your-llm-agents-image"
+  tag: "latest"
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 5000
+
+# Vector Database (Weaviate)
+weaviate:
+  image: "semitechnologies/weaviate"
+  tag: "latest"
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 8080
+
+# Document Database (MongoDB) - dependency
+mongodb:
+  enabled: true
+  auth:
+    rootPassword: "{{ .Values.mongodb.auth.rootPassword | default (lookup 'v1' 'Secret' .Release.Namespace 'llm-app-secrets').data.mongodbRootPassword | b64dec }}"
+  service:
+    port: 27017
+
+# Relational Database (PostgreSQL) - dependency
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "{{ .Values.postgresql.auth.postgresPassword | default (lookup 'v1' 'Secret' .Release.Namespace 'llm-app-secrets').data.postgresqlPassword | b64dec }}"
+  service:
+    port: 5432
+
+# Experiment Tracking (MLflow)
+mlflow:
+  image: "mlflow/mlflow"
+  tag: "latest"
+  replicas: 1
+  service:
+    type: ClusterIP
+    port: 5001
+
+# Monitoring and Observability
+monitoring:
+  prometheus:
+    enabled: true
+    service:
+      type: ClusterIP
+      port: 9090
+
+  grafana:
+    enabled: true
+    adminPassword: "{{ .Values.monitoring.grafana.adminPassword | default (lookup 'v1' 'Secret' .Release.Namespace 'llm-app-secrets').data.grafanaAdminPassword | b64dec }}"
+    service:
+      type: ClusterIP
+      port: 3000
+
+# Logging (ELK Stack)
+logging:
+  elasticsearch:
+    enabled: true
+    replicas: 1
+    service:
+      type: ClusterIP
+      port: 9200
+  kibana:
+    enabled: true
+    service:
+      type: ClusterIP
+      port: 5601
+  logstash:
+    image: "logstash"
+    tag: "latest"
+    replicas: 1
+    service:
+      type: ClusterIP
+      port: 5044

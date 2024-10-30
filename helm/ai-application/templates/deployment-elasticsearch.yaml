@@ -1,0 +1,49 @@
+# helm/ai-application/templates/deployment-elasticsearch.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+  labels:
+    app: llm-app
+    component: elasticsearch
+spec:
+  replicas: {{ .Values.logging.elasticsearch.replicas }}
+  selector:
+    matchLabels:
+      app: llm-app
+      component: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: llm-app
+        component: elasticsearch
+    spec:
+      containers:
+        - name: elasticsearch
+          image: "{{ .Values.logging.elasticsearch.image }}"
+          ports:
+            - containerPort: {{ .Values.logging.elasticsearch.service.port }}
+            - containerPort: 9300  # Cluster communication
+          env:
+            - name: discovery.type
+              value: "single-node"  # Change to clustered setup if needed
+            - name: ES_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"  # Adjust Java heap size
+
+          volumeMounts:
+            - name: es-data
+              mountPath: "/usr/share/elasticsearch/data"
+
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+
+      volumes:
+        - name: es-data
+          persistentVolumeClaim:
+            claimName: es-pvc

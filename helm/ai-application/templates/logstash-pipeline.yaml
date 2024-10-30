@@ -1,0 +1,18 @@
+# helm/ai-application/templates/logstash-pipeline.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-pipeline
+data:
+  logstash.conf: |
+    input {
+      beats {
+        port => 5044
+      }
+    }
+    output {
+      elasticsearch {
+        hosts => ["http://elasticsearch:{{ .Values.logging.elasticsearch.service.port }}"]
+        index => "llm-app-logs-%{+YYYY.MM.dd}"
+      }
+    }

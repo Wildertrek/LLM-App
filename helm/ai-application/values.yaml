@@ -63,7 +63,7 @@ mlflow:
   tag: "latest"
   replicas: 1
   service:
-    type: ClusterIP
+    type: ClusterIP # Use ClusterIP for internal cluster access, or NodePort/LoadBalancer as needed
     port: 5001
 
 # Monitoring and Observability
@@ -71,33 +71,55 @@ monitoring:
   prometheus:
     enabled: true
     service:
-      type: ClusterIP
+      type: ClusterIP # Use ClusterIP for internal cluster access, or NodePort/LoadBalancer as needed
       port: 9090
 
   grafana:
     enabled: true
     adminPassword: "{{ .Values.monitoring.grafana.adminPassword | default (lookup 'v1' 'Secret' .Release.Namespace 'llm-app-secrets').data.grafanaAdminPassword | b64dec }}"
     service:
-      type: ClusterIP
+      type: ClusterIP # Use ClusterIP for internal cluster access, or NodePort/LoadBalancer as needed
       port: 3000
 
 # Logging (ELK Stack)
 logging:
   elasticsearch:
     enabled: true
+    image: "docker.elastic.co/elasticsearch/elasticsearch"
+    tag: "7.17.1"
     replicas: 1
     service:
-      type: ClusterIP
+      type: ClusterIP # Use ClusterIP for internal cluster access, or NodePort/LoadBalancer as needed
       port: 9200
   kibana:
     enabled: true
     service:
-      type: ClusterIP
+      type: LoadBalancer  # Use LoadBalancer for external access, or ClusterIP/NodePort as needed
       port: 5601
   logstash:
     image: "logstash"
     tag: "latest"
     replicas: 1
     service:
-      type: ClusterIP
+      type: ClusterIP # Use ClusterIP for internal cluster access, or NodePort/LoadBalancer if external access is needed
       port: 5044
+  grafana:
+    enabled: true
+    image: "grafana/grafana"
+    tag: "9.3.1"
+    replicas: 1
+    service:
+      type: ClusterIP   # Use ClusterIP for internal cluster access, or NodePort/LoadBalancer as needed
+      port: 3000
+  logstash:
+    enabled: true
+    image: "docker.elastic.co/logstash/logstash"
+    tag: "7.17.1"
+    replicas: 1
+    service:
+      type: ClusterIP # Use ClusterIP for internal cluster access, or NodePort/LoadBalancer as needed
+      port: 5044
+
+
+
+

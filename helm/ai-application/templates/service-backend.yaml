@@ -1,0 +1,17 @@
+# helm/ai-application/templates/service-backend.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    app: llm-app
+    component: backend
+spec:
+  type: {{ .Values.backend.service.type }}
+  ports:
+    - port: {{ .Values.backend.service.port }}
+      targetPort: 8000  # Port exposed by the backend container
+      protocol: TCP
+  selector:
+    app: llm-app
+    component: backend

@@ -1,0 +1,109 @@
+# helm/ai-application/templates/deployment-backend.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: llm-app
+    component: backend
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  selector:
+    matchLabels:
+      app: llm-app
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: llm-app
+        component: backend
+    spec:
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image }}:{{ .Values.backend.tag }}"
+          ports:
+            - containerPort: 8000
+          env:
+            # Basic Environment Variables
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: APP_ENV
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: LOG_LEVEL
+            
+            # Backend URLs and Databases
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: DATABASE_URL
+            - name: MONGODB_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: MONGODB_URI
+
+            # LLM and Vector Database URLs for RAG pipeline
+            - name: LLM_AGENT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: LLM_AGENT_URL
+            - name: WEAVIATE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: WEAVIATE_URL
+
+            # API Endpoints
+            - name: OPENAI_API_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: OPENAI_API_BASE
+            - name: ANTHROPIC_API_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: ANTHROPIC_API_BASE
+            - name: LANGCHAIN_API_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: LANGCHAIN_API_BASE
+
+            # Authentication and Secrets
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: llm-app-secrets
+                  key: clientId
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: llm-app-secrets
+                  key: clientSecret
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: llm-app-secrets
+                  key: postgresqlPassword
+            - name: MONGODB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: llm-app-secrets
+                  key: mongodbRootPassword
+
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}

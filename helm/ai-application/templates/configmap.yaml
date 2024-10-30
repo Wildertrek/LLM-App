@@ -1,0 +1,38 @@
+# helm/ai-application/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llm-app-config
+  namespace: default  # Replace with your specific namespace if different
+data:
+  # Application-wide settings
+  APP_ENV: "production"
+  LOG_LEVEL: "info"
+
+  # Backend (FastAPI) configuration
+  BACKEND_URL: "http://backend:8000"
+  DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD}@postgresql:5432/llmapp"
+  MONGODB_URI: "mongodb://root:${MONGODB_ROOT_PASSWORD}@mongodb:27017/llmapp?authSource=admin"
+
+  # Frontend (Next.js) configuration
+  FRONTEND_URL: "http://frontend:3000"
+
+  # LLM Agents configuration
+  LLM_AGENT_URL: "http://llm-agents:5000"
+
+  # MLflow configuration
+  MLFLOW_TRACKING_URI: "http://mlflow:5001"
+
+  # Monitoring and Logging endpoints
+  PROMETHEUS_URL: "http://prometheus:9090"
+  GRAFANA_URL: "http://grafana:3000"
+  ELASTICSEARCH_URL: "http://elasticsearch:9200"
+  KIBANA_URL: "http://kibana:5601"
+
+  # Vector Database (Weaviate) for RAG pipeline
+  WEAVIATE_URL: "http://weaviate:8080"
+
+  # API and Service Endpoints
+  OPENAI_API_BASE: "https://api.openai.com/v1/"
+  ANTHROPIC_API_BASE: "https://api.anthropic.com/v1/"
+  LANGCHAIN_API_BASE: "https://api.langchain.com/v1/"

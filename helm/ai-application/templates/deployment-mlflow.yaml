@@ -1,0 +1,65 @@
+# helm/ai-application/templates/deployment-mlflow.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow
+  labels:
+    app: llm-app
+    component: mlflow
+spec:
+  replicas: {{ .Values.mlflow.replicas }}
+  selector:
+    matchLabels:
+      app: llm-app
+      component: mlflow
+  template:
+    metadata:
+      labels:
+        app: llm-app
+        component: mlflow
+    spec:
+      containers:
+        - name: mlflow
+          image: "{{ .Values.mlflow.image }}:{{ .Values.mlflow.tag }}"
+          ports:
+            - containerPort: {{ .Values.mlflow.service.port }}
+          env:
+            # Define the tracking URI and backend store for MLflow experiments
+            - name: MLFLOW_TRACKING_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: MLFLOW_TRACKING_URI
+
+            # Optional: Database configuration if using PostgreSQL as the backend store
+            - name: MLFLOW_BACKEND_STORE_URI
+              value: "postgresql://postgres:${POSTGRES_PASSWORD}@postgresql:5432/mlflowdb"
+
+            # Set the default artifact root for storing experiment data
+            - name: MLFLOW_ARTIFACT_ROOT
+              value: "s3://your-bucket-name/path"  # Replace with actual S3 bucket or storage path
+
+            # Load sensitive environment variables (e.g., database password)
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: llm-app-secrets
+                  key: postgresqlPassword
+
+          volumeMounts:
+            - name: mlflow-artifacts
+              mountPath: /mlflow/artifacts
+
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+
+      volumes:
+        - name: mlflow-artifacts
+          persistentVolumeClaim:
+            claimName: mlflow-artifacts-pvc

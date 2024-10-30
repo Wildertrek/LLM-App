@@ -1,0 +1,17 @@
+# helm/ai-application/templates/service-kibana.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+  labels:
+    app: llm-app
+    component: kibana
+spec:
+  type: {{ .Values.logging.kibana.service.type }}
+  selector:
+    app: llm-app
+    component: kibana
+  ports:
+    - name: http
+      port: 5601          # Service port exposed outside the cluster
+      targetPort: 5601     # Port on the Kibana container

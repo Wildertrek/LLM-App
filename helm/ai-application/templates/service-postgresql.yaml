@@ -1,0 +1,17 @@
+# helm/ai-application/templates/service-postgresql.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  labels:
+    app: llm-app
+    component: postgresql
+spec:
+  type: {{ .Values.postgresql.service.type }}
+  selector:
+    app: llm-app
+    component: postgresql
+  ports:
+    - name: postgresql
+      port: 5432         # Service port exposed within the cluster
+      targetPort: 5432    # Port on the PostgreSQL container

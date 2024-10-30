@@ -1,0 +1,13 @@
+# helm/ai-application/templates/pvc-elasticsearch.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: es-pvc
+  labels:
+    app: llm-app
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi # Adjust as needed

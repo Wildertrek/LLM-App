@@ -1,0 +1,52 @@
+# helm/ai-application/templates/deployment-mongodb.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  labels:
+    app: llm-app
+    component: mongodb
+spec:
+  replicas: {{ .Values.mongodb.replicas }}
+  selector:
+    matchLabels:
+      app: llm-app
+      component: mongodb
+  template:
+    metadata:
+      labels:
+        app: llm-app
+        component: mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: "{{ .Values.mongodb.image }}:{{ .Values.mongodb.tag }}"
+          ports:
+            - containerPort: {{ .Values.mongodb.service.port }}
+          env:
+            # Root user credentials from Kubernetes secret
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: "root"
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: llm-app-secrets
+                  key: mongodbRootPassword
+
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: mongo-pvc

@@ -1,0 +1,17 @@
+# helm/ai-application/templates/service-prometheus.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  labels:
+    app: llm-app
+    component: prometheus
+spec:
+  type: {{ .Values.prometheus.service.type }}
+  selector:
+    app: llm-app
+    component: prometheus
+  ports:
+    - name: http
+      port: 9090         # Service port exposed outside the cluster
+      targetPort: 9090    # Port on the Prometheus container

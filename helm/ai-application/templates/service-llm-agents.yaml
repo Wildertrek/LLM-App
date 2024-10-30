@@ -1,0 +1,17 @@
+# helm/ai-application/templates/service-llm-agents.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-agents
+  labels:
+    app: llm-app
+    component: llm-agents
+spec:
+  type: {{ .Values.llmAgents.service.type }}
+  selector:
+    app: llm-app
+    component: llm-agents
+  ports:
+    - name: http
+      port: 5000         # Service port exposed outside the cluster
+      targetPort: 5000    # Port on the LLM Agents container

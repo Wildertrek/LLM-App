@@ -1,0 +1,52 @@
+# helm/ai-application/templates/deployment-logstash.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+  labels:
+    app: llm-app
+    component: logstash
+spec:
+  replicas: {{ .Values.logging.logstash.replicas }}
+  selector:
+    matchLabels:
+      app: llm-app
+      component: logstash
+  template:
+    metadata:
+      labels:
+        app: llm-app
+        component: logstash
+    spec:
+      containers:
+        - name: logstash
+          image: "{{ .Values.logging.logstash.image }}:{{ .Values.logging.logstash.tag }}"
+          ports:
+            - containerPort: {{ .Values.logging.logstash.service.port }}
+          env:
+            # Configuring Elasticsearch as the output destination for Logstash
+            - name: ELASTICSEARCH_HOSTS
+              value: "http://elasticsearch:{{ .Values.logging.elasticsearch.service.port }}"
+          volumeMounts:
+            - name: logstash-config
+              mountPath: /usr/share/logstash/config/logstash.yml
+              subPath: logstash.yml
+            - name: logstash-pipeline
+              mountPath: /usr/share/logstash/pipeline/logstash.conf
+              subPath: logstash.conf
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+
+      volumes:
+        - name: logstash-config
+          configMap:
+            name: logstash-config
+        - name: logstash-pipeline
+          configMap:
+            name: logstash-pipeline

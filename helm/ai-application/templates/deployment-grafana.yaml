@@ -1,0 +1,44 @@
+# helm/ai-application/templates/deployment-grafana.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  labels:
+    app: llm-app
+    component: grafana
+spec:
+  replicas: {{ .Values.logging.grafana.replicas }}
+  selector:
+    matchLabels:
+      app: llm-app
+      component: grafana
+  template:
+    metadata:
+      labels:
+        app: llm-app
+        component: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: "{{ .Values.logging.grafana.image }}:{{ .Values.logging.grafana.tag }}"
+          ports:
+            - containerPort: {{ .Values.logging.grafana.service.port }}
+          env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: llm-app-secrets
+                  key: grafanaAdminPassword
+
+            # Optional environment variable if using Prometheus as data source
+            - name: GF_DATASOURCE_URL
+              value: "http://prometheus:9090"
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}

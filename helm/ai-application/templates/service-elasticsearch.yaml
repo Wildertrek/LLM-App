@@ -1,0 +1,20 @@
+# helm/ai-application/templates/service-elasticsearch.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  labels:
+    app: llm-app
+    component: elasticsearch
+spec:
+  type: {{ .Values.logging.elasticsearch.service.type }}
+  selector:
+    app: llm-app
+    component: elasticsearch
+  ports:
+    - name: http
+      port: 9200       # Service port for HTTP API
+      targetPort: 9200  # Port on the Elasticsearch container
+    - name: transport
+      port: 9300       # Service port for cluster communication
+      targetPort: 9300  # Port on the Elasticsearch container

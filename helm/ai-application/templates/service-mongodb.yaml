@@ -1,0 +1,17 @@
+# helm/ai-application/templates/service-mongodb.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  labels:
+    app: llm-app
+    component: mongodb
+spec:
+  type: {{ .Values.mongodb.service.type }}
+  selector:
+    app: llm-app
+    component: mongodb
+  ports:
+    - name: mongodb
+      port: 27017         # Service port exposed inside the cluster
+      targetPort: 27017    # Port on the MongoDB container

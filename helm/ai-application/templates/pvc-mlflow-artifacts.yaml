@@ -1,0 +1,13 @@
+# helm/ai-application/templates/pvc-mlflow-artifacts.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mlflow-artifacts-pvc
+  labels:
+    app: llm-app
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi  # Adjust size as needed

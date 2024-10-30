@@ -1,0 +1,17 @@
+# helm/ai-application/templates/service-mlflow.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow
+  labels:
+    app: llm-app
+    component: mlflow
+spec:
+  type: {{ .Values.mlflow.service.type }}
+  selector:
+    app: llm-app
+    component: mlflow
+  ports:
+    - name: http
+      port: 5001          # Service port exposed outside the cluster
+      targetPort: 5001     # Port on the MLflow container

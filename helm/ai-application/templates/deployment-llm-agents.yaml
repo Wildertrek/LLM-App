@@ -1,0 +1,80 @@
+# helm/ai-application/templates/deployment-llm-agents.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-agents
+  labels:
+    app: llm-app
+    component: llm-agents
+spec:
+  replicas: {{ .Values.llmAgents.replicas }}
+  selector:
+    matchLabels:
+      app: llm-app
+      component: llm-agents
+  template:
+    metadata:
+      labels:
+        app: llm-app
+        component: llm-agents
+    spec:
+      containers:
+        - name: llm-agents
+          image: "{{ .Values.llmAgents.image }}:{{ .Values.llmAgents.tag }}"
+          ports:
+            - containerPort: 5000
+          env:
+            # Backend API and Vector Database URLs
+            - name: BACKEND_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: BACKEND_URL
+            - name: WEAVIATE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: WEAVIATE_URL
+
+            # API endpoints for various LLM providers
+            - name: OPENAI_API_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: OPENAI_API_BASE
+            - name: ANTHROPIC_API_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: ANTHROPIC_API_BASE
+            - name: LANGCHAIN_API_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: llm-app-config
+                  key: LANGCHAIN_API_BASE
+
+            # API keys and credentials from secrets
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm-app-secrets
+                  key: openaiApiKey
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm-app-secrets
+                  key: anthropicApiKey
+            - name: LANGCHAIN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm-app-secrets
+                  key: langchainApiKey
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}

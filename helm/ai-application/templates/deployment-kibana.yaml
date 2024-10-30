@@ -1,0 +1,38 @@
+# helm/ai-application/templates/deployment-kibana.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+  labels:
+    app: llm-app
+    component: kibana
+spec:
+  replicas: {{ .Values.logging.kibana.replicas }}
+  selector:
+    matchLabels:
+      app: llm-app
+      component: kibana
+  template:
+    metadata:
+      labels:
+        app: llm-app
+        component: kibana
+    spec:
+      containers:
+        - name: kibana
+          image: "{{ .Values.logging.kibana.image }}:{{ .Values.logging.kibana.tag }}"
+          ports:
+            - containerPort: {{ .Values.logging.kibana.service.port }}
+          env:
+            # Set the URL for Elasticsearch
+            - name: ELASTICSEARCH_HOSTS
+              value: "http://elasticsearch:{{ .Values.logging.elasticsearch.service.port }}"
+
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}

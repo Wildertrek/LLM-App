@@ -1,0 +1,17 @@
+# helm/ai-application/templates/service-logstash.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+  labels:
+    app: llm-app
+    component: logstash
+spec:
+  type: {{ .Values.logging.logstash.service.type }}
+  selector:
+    app: llm-app
+    component: logstash
+  ports:
+    - name: beats-input
+      port: 5044           # Service port exposed outside the cluster for log ingestion
+      targetPort: 5044      # Port on the Logstash container

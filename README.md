@@ -1,5 +1,3 @@
-Here's the cleaned-up, emoji-enhanced README for improved readability and structure:
-
 ---
 
 # 🚀 AI Application on K8s
